@@ -3,53 +3,30 @@ Cyclistic bike-share Analysis
 Miguel Soares
 2024-04-21
 
-### Introduction
+## Introduction
 
-Cyclistic is a *fictional* bike-sharing service founded in 2016,
-currently it has grown to a fleet of nearly 6000 bikes and close to 700
-stations placed throughout Chicago, IL. Up until now Cyclistics
-marketing strategy relied on its flexible payment plans, that allowed
-customers to pick-and-chose hte type of experience they desired.
+Cyclistic is a *fictional* bike-sharing service founded in 2016, currently it has grown to a fleet of nearly 6000 bikes and close to 700 stations placed throughout Chicago, IL. Up until now Cyclistics marketing strategy relied on its flexible payment plans, that allowed customers to pick-and-chose hte type of experience they desired.
 
 This payment plan categorized customers under the following:
 
 - **Casual users** - pay-per-ride/day plan  
-- **Annual members** - annual subscription allowing unlimited use of
-  bicycles and other perks
+- **Annual members** - annual subscription allowing unlimited use of bicycles and other perks
 
-Having concluded that the brand’s reach has increased sufficiently and
-that annual members are substantialy more profitable compared to casual
-users, the director of marketing believes that converting the casual
-user-base, who already has a history with the service, will be key for
-future growth.
+Having concluded that the brand’s reach has increased sufficiently and that annual members are substantialy more profitable compared to casual users, the director of marketing believes that converting the casual user-base, who already has a history with the service, will be key for future growth.
 
-As such a new goal has been established, design marketing strategies
-aimed at converting casual riders into annual members. However, in order
-to do that, the team needs to better understand how both types differ
-from one another and what could motivate casual users to buy a
-membership.
+As such a new goal has been established, design marketing strategies aimed at converting casual riders into annual members. However, in order to do that, the team needs to better understand how both types differ from one another and what could motivate casual users to buy a membership.
 
-Note:  
-*Data used belongs to the City of Chicago’s bike sharing service Divvy,
-operated by Lyft Bikes and Scooters, LLC, and is publicly published
-under the following
-[licence](https://divvybikes.com/data-license-agreement) on this
-[link](https://divvy-tripdata.s3.amazonaws.com/index.html). This
-data-set is composed of historical, first-party data gathered from the
-beginning of 2014 until the present, published quarterly up to the first
-quarter of 2020 and monthly thereafter.*
+**Note:**  
+*Data used belongs to the City of Chicago’s bike sharing service Divvy, operated by Lyft Bikes and Scooters, LLC, and is publicly published under the following [licence](https://divvybikes.com/data-license-agreement) on this [link](https://divvy-tripdata.s3.amazonaws.com/index.html). This data-set is composed of historical, first-party data gathered from the beginning of 2014 until the present, published quarterly up to the first quarter of 2020 and monthly thereafter.*
 
-### Business Task
+## Business Task
 
-Preform an exploratory data analysis (EDA) on the customer base &
-consumer habits of casual and annual membership users.  
-Identify key differences and potential opportunities to influence
-customers into upgrading their subscription plan.
+Preform an exploratory data analysis (EDA) on the customer base & consumer habits of casual and annual membership users.  
+Identify key differences and potential opportunities to influence customers into upgrading their subscription plan.
 
-### Innitial Hypothesis
+## Innitial Hypothesis
 
-The initial hypothesis regarding the distinct characteristics of both
-customer types are the following:
+The initial hypothesis regarding the distinct characteristics of both customer types are the following:
 
 **Annual members**
 
@@ -65,13 +42,11 @@ customer types are the following:
   - Higher ride frequency during weekends
   - Highly seasonal, tending towards spring & summer
 
-### Data Cleaning
+## Data Cleaning
 
-Data analyzed (from beginning to end of 2023), due to size limitations,
-was stored in the data warehouse [BigQuery](https://cloud.google.com/)
-and was queried through a Structure Query Language (SQL). <br>
+Data analyzed (from beginning to end of 2023), due to size limitations, was stored in the data warehouse [BigQuery](https://cloud.google.com/) and was queried through a Structure Query Language (SQL).
 
-#### Looking at the data
+### Looking at the data
 
 The data directly gathered has the following attributes:
 
@@ -90,20 +65,18 @@ The data directly gathered has the following attributes:
 - **end_lng**: The longitude at the end of the trip.
 - **member_casual**: The type of customer (casual/member).
 
-![Data Schema](data_schema.png) <br>
+![Data Schema](Graphs/data_schema.png) <br>
 
-#### Checking for duplicate information
+### Checking for duplicate information
 ``` sql
 SELECT 
   COUNT(DISTINCT ride_id) AS number_of_distinct_rides  
 FROM
   database
 ```
-<br> Results in a total 5719877 entries \> no individual trips were
-logged multiple times.  
-<br>
+Results in a total 5719877 entries \> no individual trips were logged multiple times.  
 
-#### Checking for geographical outliers
+### Checking for geographical outliers
 ``` sql
 SELECT
   MIN(start_lat) AS minimum_latitude,
@@ -113,11 +86,9 @@ SELECT
 FROM
   database
 ```
-<br> All starting and ending coordinates inside expected range: Chicago
--\> latitude ∈ \[41.75±0.25\], longitude ∈ \[-87.75±0.25\]  
-<br>
+All starting and ending coordinates inside expected range: Chicago -\> latitude ∈ \[41.75±0.25\], longitude ∈ \[-87.75±0.25\]  
 
-#### Checking for incongruencies in the trips start and end dates/times
+### Checking for incongruencies in the trips start and end dates/times
 ``` sql
 SELECT
   DATETIME_DIFF(ended_at,started_at, second) AS trip_duration # Calculates the difference between the trip’s end and start times
@@ -126,17 +97,12 @@ FROM
 ORDER BY
   trip_duration ASC
 ```
+Discrepancy observed, **272** start dates occur after their respective end dates and need to be fixed!  
 
-<br> Discrepancy observed, **272** start dates occur after their
-respective end dates and need to be fixed!  
-<br>
+### Checking Redundant information and Data types
 
-#### Checking Redundant information and Data types
-
-Station names and ids were deemed redundant as geographical coordinates
-are available, similarly end station coordinates were disregarded in
-order to simplify geographical marking of starting stations.  
-<br> Data types were checked by analyzing the database schema:
+Station names and ids were deemed redundant as geographical coordinates are available, similarly end station coordinates were disregarded in order to simplify geographical marking of starting stations.  
+Data types were checked by analyzing the database schema:
 
 - ride_id: STRING  
 - rideable_type: STRING  
@@ -145,9 +111,8 @@ order to simplify geographical marking of starting stations.
 - start_lat: FLOAT  
 - start_lng: FLOAT  
 - member_casual: STRING  
-  <br>
 
-#### Checking for missing values
+### Checking for missing values
 ``` sql
 SELECT *
 FROM
@@ -161,10 +126,9 @@ WHERE
   OR start_lng IS NULL
   OR member_casual IS NULL
 ```
-<br> All relevant columns presented no missing values.  
-<br>
+All relevant columns presented no missing values.  
 
-#### Creating the cleaned table
+### Creating the cleaned table
 ``` sql
 SELECT
   ride_id,
@@ -186,19 +150,15 @@ FROM
 ORDER BY
   start_datetime
 ```
-### Data Exploration
+## Data Exploration
 
-This data-set allows for the exploration of three main components when
-in regards to differences in behavior of casual users and annual
-membership holders, with them being:
+This data-set allows for the exploration of three main components when in regards to differences in behavior of casual users and annual membership holders, with them being:
 
 - **Date & time** each bicycle trip was started and its **duration**  
 - **Where** each trip started  
 - What was the **type** of bike used  
-  <br>
 
-#### Date & Time - Trip Duration
-
+### Date & Time - Trip Duration
 ``` r
 duration_casual <- duration_data %>% filter(member_casual=="casual")
 duration_member <- duration_data %>% filter(member_casual=="member")
@@ -230,19 +190,14 @@ annotate("text",x=18,y=12.2,label="Member ",color="darkgreen")+
 annotate("text",x=36,y=13,label=substr(paste("Average:",average_casual),1,13),color="black")+
 annotate("text",x=33.5,y=12.2,label="User      ",color="purple")
 ```
+![](Graphs/duration_usertype_graph.png) <br> 
+By overlapping the trip duration histogram of both customer types, we quickly determine how Annual members show a significant tendency towards shorter trips, more than halving average ride duration when compared to the more casual users.  
 
-![](duration_usertype_graph.png) <br> By overlapping the trip duration
-histogram of both customer types, we quickly determine how Annual
-members show a significant tendency towards shorter trips, more than
-halving average ride duration when compared to the more casual users.  
-<br>
-
-#### Date & Time - Hours of the day
+### Date & Time - Hours of the day
 
 Due to computation limitations with RStudio and big packets of data,
 time of day data was first extracted through the use of python’s library
 *pandas*.
-
 ``` python
 import pandas as pd
 
@@ -277,9 +232,7 @@ member_df=pd.DataFrame(member_data,columns=['start_datetime'])
 casual_df.to_csv('casual_hour.csv')
 member_df.to_csv('member_hour.csv')
 ```
-
 <br> Which now allows us to use R to create the visualization:
-
 ``` r
 start_casual <- read.csv("casual_hour.csv")
 start_member <- read.csv("member_hour.csv")
@@ -299,15 +252,10 @@ guides(fill = guide_legend(override.aes = list(alpha = 1)))+
 labs(title = "Hourly distribution of rides", x = "Hour of the day", y = "Percentage of customers (%)")+
 theme(legend.position="bottom")
 ```
+![](Graphs/time_of_day_chart.png) <br>
+A significant increase through the day can be seen in both customer types, peaking at 5 to 6 p.m. (end of work hours) and quickly declining afterwards. Annual member behavior distinguishes itself by having a higher primary peak and a secondary peak at 7 to 8 a.m. but lower levels outside of the rush timezone.
 
-![](time_of_day_chart.png) <br> A significant increase through the day
-can be seen in both customer types, peaking at 5 to 6 p.m. (end of work
-hours) and quickly declining afterwards. Annual member behavior
-distinguishes itself by having a higher primary peak and a secondary
-peak at 7 to 8 a.m. but lower levels outside of the rush timezone. <br>
-
-#### Date & Time - Days of the week
-
+### Date & Time - Days of the week
 ``` r
 weekday_data <- read.csv("start_datetime_usertype.csv")%>% mutate(weekday=weekdays(as_date(start_datetime)))
 
@@ -336,14 +284,10 @@ ggplot()+
        y="Number of rides")+
   theme(legend.position="bottom")
 ```
+![](Graphs/weekday_chart.png) <br> 
+While casual users seem to prefer going on bicycle rides during friday and the weekend, annual members actually have their highest activity during the weekdays, with a significant drop-off nearing the end of the week.
 
-![](weekday_chart.png) <br> While casual users seem to prefer going on
-bicycle rides during friday and the weekend, annual members actually
-have their highest activity during the weekdays, with a significant
-drop-off nearing the end of the week. <br>
-
-#### Date & Time - Seasonality
-
+### Date & Time - Seasonality
 ``` r
 date_data <- read.csv("start_datetime_usertype.csv")%>%
   mutate(date=format(as.Date(start_datetime),"%m/%Y"))
@@ -378,25 +322,12 @@ ggplot()+
        y="Number of rides")+
   theme(legend.position="bottom")
 ```
+![](Graphs/month_usertype_chart.png) <br>
+Although both customer types demonstrate a similar behavior, when showcasing a preference towards the warmer seasons, with a significant fall-off during autumn and a stagnation during winter. The seasonality shown by casual users is significantly greater, with the difference between their lowest and highest activity month being of **728%**, comparing to the **206%** difference found with annual members.  
 
-![](month_usertype_chart.png)  
-<br>
+### Geography - Starting locations
 
-Although both customer types demonstrate a similar behavior, when
-showcasing a preference towards the warmer seasons, with a significant
-fall-off during autumn and a stagnation during winter. The seasonality
-shown by casual users is significantly greater, with the difference
-between their lowest and highest activity month being of **728%**,
-comparing to the **206%** difference found with annual members.  
-<br>
-
-#### Geography - Starting locations
-
-The dispersion of customers throughout the city of Chicago can be a
-strong starting point to show the current focus of our different
-customer types and possible points of weakness of the distribution
-network currently available.
-
+The dispersion of customers throughout the city of Chicago can be a strong starting point to show the current focus of our different customer types and possible points of weakness of the distribution network currently available.
 ``` r
 location_data <- read.csv("lat_long_usertype.csv")
 View(location_data)
@@ -415,16 +346,10 @@ ggmap(c_map) +
   guides(color = guide_legend(override.aes = list(alpha = 1,size=3)))+
   theme(legend.position="bottom",legend.key =element_rect(fill="transparent"))
 ```
+![](Graphs/lat_long_usertype_graph.png) <br> 
+As can be seen there is a significant focus of the annual members in downtown Chicago, more specifically the Chicago Loop, Near West & North side and Lincoln Park, some of the most populated residential and business districts, whereas casual users are more evenly dispersed throughout the city.  
 
-![](lat_long_usertype_graph.png) <br> As can be seen there is a
-significant focus of the annual members in downtown Chicago, more
-specifically the Chicago Loop, Near West & North side and Lincoln Park,
-some of the most populated residential and business districts, whereas
-casual users are more evenly dispersed throughout the city.  
-<br>
-
-#### Bicycle type
-
+### Bicycle type
 ``` r
 bike_data <- read.csv("bike_type_usertype.csv")
 
@@ -462,17 +387,12 @@ ggplot()+
        y="Number of rides")+
   theme(legend.position="bottom")
 ```
+![](Graphs/bike_type_usertype_graph.png)<br>
+Annual members display a 50/50 propensity when considering bicycle type to use, while casual users show a preliminary tendency towards electric bicycles.
 
-![](bike_type_usertype_graph.png) Annual members display a 50/50
-propensity when considering bicycle type to use, while casual users show
-a preliminary tendency towards electric bicycles.
+More data would be needed regarding current bicycle type spread throughout Chicago to further analyze customer preference over one or the other as anything other that a 50/50 split would skew the total number of rides and introduce bias. <br>
 
-More data would be needed regarding current bicycle type spread
-throughout Chicago to further analyze customer preference over one or
-the other as anything other that a 50/50 split would skew the total
-number of rides and introduce bias. <br>
-
-### Conclusions
+## Conclusions
 
 - **Annual Members:** From their lower average ride durations, low
   interest in biking outside of the usual work rush hours, in
@@ -489,14 +409,9 @@ number of rides and introduce bias. <br>
   interested in their comfort and enjoyment, preferring warmer seasons
   and electric bycicles.
 
-### Recomendations going forwards
+## Recomendations going forwards
 
-The main focus when converting the more casual users of the present into
-the annual membership holders of the future relies on our capacity to
-influence the development of systematic habits. Currently users don’t
-see Cyclicist as a mode-of-transportation but as a hobby and as such the
-recommendations proposed were aligned to support this shift in paradigm.
-<br>
+The main focus when converting the more casual users of the present into the annual membership holders of the future relies on our capacity to influence the development of systematic habits. Currently users don’t see Cyclicist as a mode-of-transportation but as a hobby and as such the recommendations proposed were aligned to support this shift in paradigm.
 
 **1st - Analysis of Supporting Infrastructure:**
 
@@ -505,8 +420,6 @@ increase in bicycle usage, especially in high circulation areas like
 downtown Chicago? (additional information and analysis would be required
 looking into the current state of all stations & bicycles, estimated
 maintenance, mileage, ride frequency, etc)
-
-<br>
 
 **2nd - Marketing Campaigns:**
 
@@ -517,12 +430,9 @@ users targeted towards the 6-9 a.m. range
 summer, attracting the more casual users when they start to consider
 alternative methods of transportation.
 
-<br>
-
 **3rd - Upgrade Bicycles**
 
   - Consider slowly shifting towards a mostly electric bicycle based
 service as they are more popular between both audiences, especially
 casual users.
-
 <br>
