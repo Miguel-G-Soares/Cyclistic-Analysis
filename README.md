@@ -21,7 +21,7 @@ As such a new goal has been established, design marketing strategies aimed at co
 
 ## Business Task
 
-Preform an exploratory data analysis (EDA) on the customer base & consumer habits of casual and annual membership users.  
+Preform an exploratory data analysis (EDA) on the customer base & consumer habits of casual riders vs annual membership users.  
 Identify key differences and potential opportunities to influence customers into upgrading their subscription plan.
 
 ## Innitial Hypothesis
