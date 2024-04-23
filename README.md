@@ -93,47 +93,39 @@ The data directly gathered has the following attributes:
 ![Data Schema](data_schema.png) <br>
 
 #### Checking for duplicate information
-
-  <span style="color: blue;">SELECT</span>  
-          <span style="color: blue;">COUNT(DISTINCT
-</span>ride_id<span style="color: blue;">) AS
-</span>number_of_distinct_rides  
-  <span style="color: blue;">FROM</span>  
-          database
-
+``` sql
+SELECT 
+  COUNT(DISTINCT ride_id) AS number_of_distinct_rides  
+FROM
+  database
+```
 <br> Results in a total 5719877 entries \> no individual trips were
 logged multiple times.  
 <br>
 
 #### Checking for geographical outliers
-
-  <span style="color: blue;">SELECT</span>  
-          <span style="color: blue;">MIN(</span>start_lat<span style="color: blue;">)
-AS</span> minimum_latitude,  
-          <span style="color: blue;">MAX(</span>start_lat<span style="color: blue;">)
-AS</span> maximum_latitude,  
-          <span style="color: blue;">MIN(</span>start_lng<span style="color: blue;">)
-AS</span> minimum_logitude,  
-          <span style="color: blue;">MAX(</span>start_lng<span style="color: blue;">)
-AS</span> maximum_logitude  
-  <span style="color: blue;">FROM</span>  
-          database
-
+``` sql
+SELECT
+  MIN(start_lat) AS minimum_latitude,
+  MAX(start_lat) AS maximum_latitude,
+  MIN(start_lng) AS minimum_longitude,
+  MAX(start_lng) AS minimum_latitude,
+FROM
+  database
+```
 <br> All starting and ending coordinates inside expected range: Chicago
 -\> latitude ∈ \[41.75±0.25\], longitude ∈ \[-87.75±0.25\]  
 <br>
 
 #### Checking for incongruencies in the trips start and end dates/times
-
-  <span style="color: blue;">SELECT</span>  
-          <span style="color: blue;">DATETIME_DIFF(</span>ended_at,started_at,
-second<span style="color: blue;">) AS
-</span>trip_duration<span style="color: grey;"> \# Calculates the
-difference between the trip’s end and start times</span>  
-  <span style="color: blue;">FROM</span>  
-          database  
-  <span style="color: blue;">ORDER BY</span>  
-          trip_duration <span style="color: blue;">ASC</span>
+``` sql
+SELECT
+  DATETIME_DIFF(ended_at,started_at, second) AS trip_duration # Calculates the difference between the trip’s end and start times
+FROM
+  database
+ORDER BY
+  trip_duration ASC
+```
 
 <br> Discrepancy observed, **272** start dates occur after their
 respective end dates and need to be fixed!  
@@ -156,59 +148,44 @@ order to simplify geographical marking of starting stations.
   <br>
 
 #### Checking for missing values
-
-  <span style="color: blue;">SELECT</span> \*  
-  <span style="color: blue;">FROM</span>  
-          database  
-  <span style="color: blue;">WHERE</span>  
-          ride_id<span style="color: blue;"> IS NULL</span>  
-          <span style="color: blue;">OR
-</span>rideable_type<span style="color: blue;"> IS NULL</span>  
-          <span style="color: blue;">OR
-</span>started_at<span style="color: blue;"> IS NULL</span>  
-          <span style="color: blue;">OR
-</span>ended_at<span style="color: blue;"> IS NULL</span>  
-          <span style="color: blue;">OR
-</span>start_lat<span style="color: blue;"> IS NULL</span>  
-          <span style="color: blue;">OR
-</span>start_lng<span style="color: blue;"> IS NULL</span>  
-          <span style="color: blue;">OR
-</span>member_casual<span style="color: blue;"> IS NULL</span>
-
+``` sql
+SELECT *
+FROM
+  database
+WHERE
+  ride_id IS NULL
+  OR rideable_type IS NULL
+  OR started_at IS NULL
+  OR ended_at IS NULL
+  OR start_lat IS NULL
+  OR start_lng IS NULL
+  OR member_casual IS NULL
+```
 <br> All relevant columns presented no missing values.  
 <br>
 
 #### Creating the cleaned table
-
-  <span style="color: blue;">SELECT</span>  
-          ride_id,  
-          rideable_type,  
-          <span style="color: blue;">CASE</span><span style="color: grey;">
-\# Switches start-end when needed</span>  
-                  <span style="color: blue;">WHEN </span>started_at \<=
-ended_at<span style="color: blue;"> THEN </span>started_at  
-                  <span style="color: blue;">WHEN </span>started_at \>
-ended_at<span style="color: blue;"> THEN </span>ended_at  
-          <span style="color: blue;">END AS </span>start_datetime,  
-          <span style="color: blue;">CASE</span><span style="color: grey;">
-\# Switches start-end when needed</span>  
-                  <span style="color: blue;">WHEN </span>started_at \<=
-ended_at<span style="color: blue;"> THEN </span>ended_at  
-                  <span style="color: blue;">WHEN </span>started_at \>
-ended_at<span style="color: blue;"> THEN </span>started_at  
-          <span style="color: blue;">END AS </span>end_datetime,  
-          <span style="color: blue;">DATETIME_DIFF(</span>ended_at,started_at,
-second<span style="color: blue;">) AS
-</span>trip_duration<span style="color: grey;"> \# Adds a new
-column</span>  
-          start_lat,  
-          start_lng,  
-          member_casual  
-  <span style="color: blue;">FROM</span>  
-          database  
-  <span style="color: blue;">ORDER BY</span>  
-          start_datetime
-
+``` sql
+SELECT
+  ride_id,
+  rideable_type,
+  CASE # Switches start-end when needed
+    WHEN started_at <= ended_at THEN started_at
+    WHEN started_at > ended_at THEN ended_at
+  END AS start_datetime,
+  CASE # Switches start-end when needed
+    WHEN started_at <= ended_at THEN ended_at
+    WHEN started_at > ended_at THEN started_at
+  END AS end_datetime,
+  DATETIME_DIFF(ended_at,started_at, second) AS trip_duration # Adds a new column
+  start_lat,
+  start_lng,
+  member_casual
+FROM
+  database
+ORDER BY
+  start_datetime
+```
 ### Data Exploration
 
 This data-set allows for the exploration of three main components when
